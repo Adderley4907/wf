@@ -13,18 +13,16 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
     
-    # 第二步：设置 Docker 环境
+    # 第二步：设置 Docker 环境（可选，QEMU主要用于跨架构）
     - name: Set up Docker
       uses: docker/setup-qemu-action@v3
     
-    # 第三步：登录 Docker Hub（公开镜像可跳过）
-    - name: Log in to Docker Hub
-      uses: docker/login-action@v3
-      with:
-        username: ${{ secrets.DOCKER_USERNAME }}
-        password: ${{ secrets.DOCKER_PASSWORD }}
-      # 注意：mendix/runtime 是公开镜像，不需要登录就能下载
-      # 所以这一步可以注释掉
+    # 第三步：删除登录步骤！因为 mendix/runtime 是公开镜像，不需要登录
+    # - name: Log in to Docker Hub
+    #   uses: docker/login-action@v3
+    #   with:
+    #     username: ${{ secrets.DOCKER_USERNAME }}
+    #     password: ${{ secrets.DOCKER_PASSWORD }}
     
     # 第四步：下载 Docker 镜像
     - name: Pull Docker image
