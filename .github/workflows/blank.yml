@@ -1,0 +1,64 @@
+: Download Docker Image
+
+# 触发条件：手动触发
+:
+:  # 这是手动触发按钮
+
+:
+:
+: ubuntu-latest  # 使用最新的 Ubuntu 系统
+    
+:
+    # 第一步：拉取代码（虽然不是必须，但好习惯）
+    - : Checkout code
+: actions/checkout@v4
+    
+    # 第二步：设置 Docker 环境
+    - : Set up Docker
+: docker/setup-qemu-action@v3
+    
+    # 第三步：登录 Docker Hub（公开镜像可跳过）
+    - : Log in to Docker Hub
+: docker/login-action@v3
+:
+: ${{ secrets.DOCKER_USERNAME }}
+: ${{ secrets.DOCKER_PASSWORD }}
+      # 注意：mendix/runtime 是公开镜像，不需要登录就能下载
+      # 所以这一步可以注释掉
+    
+    # 第四步：下载 Docker 镜像
+    - : Pull Docker image
+: |
+        echo "开始下载 Docker 镜像..."
+
+        
+        # 显示镜像信息
+
+        
+        # 显示镜像详情
+
+    
+    # 第五步：将镜像保存为文件（关键步骤！）
+    - : Save Docker image to file
+: |
+        # 将镜像保存为 tar 包
+
+        
+        # 显示文件大小
+
+        
+        # 压缩一下（可选）
+        echo "正在压缩..."
+
+        
+        echo "压缩完成！"
+
+    
+    # 第六步：上传为工作流产物（方便下载）
+    - : Upload Docker image as artifact
+: actions/upload-artifact@v4
+:
+: mendix-runtime-9.24.2
+: |
+
+: 7  # 保留7天
