@@ -1,64 +1,62 @@
-: Download Docker Image
+name: Download Docker Image
 
 # 触发条件：手动触发
-:
-:  # 这是手动触发按钮
+on:
+  workflow_dispatch:  # 这是手动触发按钮
 
-:
-:
-: ubuntu-latest  # 使用最新的 Ubuntu 系统
+jobs:
+  download-docker:
+    runs-on: ubuntu-latest  # 使用最新的 Ubuntu 系统
     
-:
+    steps:
     # 第一步：拉取代码（虽然不是必须，但好习惯）
-    - : Checkout code
-: actions/checkout@v4
+    - name: Checkout code
+      uses: actions/checkout@v4
     
-    # 第二步：设置 Docker 环境
-    - : Set up Docker
-: docker/setup-qemu-action@v3
+    # 第二步：设置 Docker 环境（可选，QEMU主要用于跨架构）
+    - name: Set up Docker
+      uses: docker/setup-qemu-action@v3
     
-    # 第三步：登录 Docker Hub（公开镜像可跳过）
-    - : Log in to Docker Hub
-: docker/login-action@v3
-:
-: ${{ secrets.DOCKER_USERNAME }}
-: ${{ secrets.DOCKER_PASSWORD }}
-      # 注意：mendix/runtime 是公开镜像，不需要登录就能下载
-      # 所以这一步可以注释掉
+    # 第三步：删除登录步骤！因为 mendix/runtime 是公开镜像，不需要登录
+    # - name: Log in to Docker Hub
+    #   uses: docker/login-action@v3
+    #   with:
+    #     username: ${{ secrets.DOCKER_USERNAME }}
+    #     password: ${{ secrets.DOCKER_PASSWORD }}
     
     # 第四步：下载 Docker 镜像
-    - : Pull Docker image
-: |
+    - name: Pull Docker image
+      run: |
         echo "开始下载 Docker 镜像..."
-
+        docker pull mendix/runtime:9.24.2
         
         # 显示镜像信息
-
+        docker images | grep mendix
         
         # 显示镜像详情
-
+        docker image inspect mendix/runtime:9.24.2 | grep -E "Size|Id|Created"
     
     # 第五步：将镜像保存为文件（关键步骤！）
-    - : Save Docker image to file
-: |
+    - name: Save Docker image to file
+      run: |
         # 将镜像保存为 tar 包
-
+        docker save mendix/runtime:9.24.2 -o mendix-runtime-9.24.2.tar
         
         # 显示文件大小
-
+        ls -lh *.tar
         
         # 压缩一下（可选）
         echo "正在压缩..."
-
+        gzip mendix-runtime-9.24.2.tar
         
         echo "压缩完成！"
-
+        ls -lh *.tar.gz
     
     # 第六步：上传为工作流产物（方便下载）
-    - : Upload Docker image as artifact
-: actions/upload-artifact@v4
-:
-: mendix-runtime-9.24.2
-: |
-
-: 7  # 保留7天
+    - name: Upload Docker image as artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: mendix-runtime-9.24.2
+        path: |
+          mendix-runtime-9.24.2.tar.gz
+        retention-days: 7  # 保留7天
