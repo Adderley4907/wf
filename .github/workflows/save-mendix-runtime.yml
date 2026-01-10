@@ -1,0 +1,25 @@
+name: Save mendix/runtime:9.24.2 to repo artifacts
+on:
+  workflow_dispatch:      # 手动点按钮触发
+  # push:                 # 也可以放开，每次推送就自动更新
+  #   branches: [ main ]
+
+jobs:
+  pull-and-save:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: write      # 上传 artifact 需要写权限
+    steps:
+      - name: 1. 拉取官方镜像
+        run: docker pull mendix/runtime:9.24.2
+
+      - name: 2. 打成离线 tar 包
+        run: docker save mendix/runtime:9.24.2 -o mendix-runtime-9.24.2.tar
+
+      - name: 3. 上传到 GitHub Actions Artifacts（官方免费存储）
+        uses: actions/upload-artifact@v4
+        with:
+          name: mendix-runtime-9.24.2   # 下载时看到的文件名
+          path: mendix-runtime-9.24.2.tar
+          retention-days: 90            # 官方默认 90 天，可改成 1~400
